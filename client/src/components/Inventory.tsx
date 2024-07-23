@@ -4,7 +4,7 @@ import {
   TableCell, TableContainer, TableHead, TableRow, CircularProgress, 
   Button, Alert, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getProducts, deleteProduct } from '../services/api';
 
 interface Product {
@@ -22,6 +22,7 @@ const Inventory: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
@@ -112,10 +113,19 @@ const Inventory: React.FC = () => {
                   <TableCell align="right">${product.Price.toFixed(2)}</TableCell>
                   <TableCell align="center">
                     <Button 
+                      onClick={() => navigate(`/product/${product.ID}`)}
+                      size="small" 
+                      color="primary"
+                      sx={{ mr: 1 }}
+                    >
+                      View Details
+                    </Button>
+                    <Button 
                       component={Link} 
                       to={`/edit-product/${product.ID}`} 
                       size="small" 
                       color="primary"
+                      sx={{ mr: 1 }}
                     >
                       Edit
                     </Button>

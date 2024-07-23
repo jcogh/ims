@@ -11,6 +11,7 @@ import Dashboard from './components/Dashboard';
 import Inventory from './components/Inventory';
 import AddProductPage from './components/AddProductPage';
 import EditProductPage from './components/EditProductPage';
+import ProductDetailPage from './components/ProductDetailPage';
 import theme from './theme';
 
 const App: React.FC = () => {
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
             <Route path="/add-product" element={<ProtectedRoute><AddProductPage /></ProtectedRoute>} />
             <Route path="/edit-product/:id" element={<ProtectedRoute><EditProductPage /></ProtectedRoute>} />
+            <Route path="/product/:id" element={<ProtectedRoute><ProductDetailPage /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           </Routes>
         </Router>

@@ -9,6 +9,7 @@ const api = axios.create({
   },
 });
 
+// Add a request interceptor to include the token in requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -20,33 +21,28 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export const register = (username: string, email: string, password: string) => {
-  return api.post('/register', { username, email, password });
-};
-
 export const login = async (username: string, password: string) => {
   const response = await api.post('/login', { username, password });
   return response.data;
 };
 
-export const getProducts = async () => {
-  return api.get('/products');
+export const register = async (username: string, email: string, password: string) => {
+  const response = await api.post('/register', { username, email, password });
+  return response.data;
 };
 
-export const getProduct = async (id: number) => {
-  return api.get(`/products/${id}`);
-};
+export const getProducts = () => api.get('/products');
 
-export const addProduct = async (productData: any) => {
-  return api.post('/products', productData);
-};
+export const getProduct = (id: number) => api.get(`/products/${id}`);
 
-export const updateProduct = async (id: number, productData: any) => {
-  return api.put(`/products/${id}`, productData);
-};
+export const addProduct = (productData: any) => api.post('/products', productData);
 
-export const deleteProduct = async (id: number) => {
-  return api.delete(`/products/${id}`);
-};
+export const updateProduct = (id: number, productData: any) => api.put(`/products/${id}`, productData);
+
+export const deleteProduct = (id: number) => api.delete(`/products/${id}`);
+
+export const getRecentProducts = () => api.get('/products/recent');
+
+export const getPrediction = (productId: number) => api.get(`/predict/${productId}`);
 
 export default api;

@@ -31,9 +31,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		// Product routes
 		api.POST("/products", productController.CreateProduct)
 		api.GET("/products", productController.GetProducts)
-		api.GET("/products/:id", productController.GetProduct) // Add this line for getting a single product
+		api.GET("/products/:id", productController.GetProduct)
 		api.PUT("/products/:id", productController.UpdateProduct)
 		api.DELETE("/products/:id", productController.DeleteProduct)
+		api.GET("/products/recent", productController.GetRecentProducts)
 
 		// Prediction route
 		api.GET("/predict/:id", predictionController.PredictOrderQuantity)

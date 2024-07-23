@@ -8,3 +8,4 @@ type Sales struct {
 	Quantity  uint      `gorm:"not null"`
 	Date      time.Time `gorm:"not null"`
 }
+
