@@ -13,8 +13,16 @@ export const register = (username: string, email: string, password: string) => {
   return api.post('/register', { username, email, password });
 };
 
-export const login = (username: string, password: string) => {
-  return api.post('/login', { username, password });
+export const login = async (username: string, password: string) => {
+  try {
+    const response = await api.post('/login', { username, password });
+    if (response.data.token) {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : { error: 'An unexpected error occurred' };
+  }
 };
 
 export const getProducts = () => {
