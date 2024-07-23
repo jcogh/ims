@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/jmcgh/ims/server/controllers"
-	"github.com/jmcgh/ims/server/utils"
+	"github.com/jcogh/ims/server/controllers"
+	"github.com/jcogh/ims/server/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

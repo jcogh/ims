@@ -1,4 +1,4 @@
-module github.com/jmcgh/ims
+module github.com/jcogh/ims
 
 go 1.22.4
 

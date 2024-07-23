@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/jmcgh/ims/server/models"
-	"github.com/jmcgh/ims/server/routes"
-	"github.com/jmcgh/ims/server/utils"
+	"github.com/jcogh/ims/server/models"
+	"github.com/jcogh/ims/server/routes"
+	"github.com/jcogh/ims/server/utils"
 	"log"
 
 	"github.com/joho/godotenv"

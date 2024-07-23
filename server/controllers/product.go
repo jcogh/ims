@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/jmcgh/ims/server/models"
+	"github.com/jcogh/ims/server/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
