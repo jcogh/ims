@@ -20,6 +20,10 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+export const register = (username: string, email: string, password: string) => {
+  return api.post('/register', { username, email, password });
+};
+
 export const login = async (username: string, password: string) => {
   const response = await api.post('/login', { username, password });
   return response.data;
@@ -29,11 +33,7 @@ export const getProducts = async () => {
   return api.get('/products');
 };
 
-export const register = (username: string, email: string, password: string) => {
-  return api.post('/register', { username, email, password });
-};
-
-export const addProduct = (productData: any) => {
+export const addProduct = async (productData: any) => {
   return api.post('/products', productData);
 };
 

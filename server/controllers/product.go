@@ -24,6 +24,11 @@ func (pc *ProductController) CreateProduct(c *gin.Context) {
 		return
 	}
 
+	if product.SKU == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "SKU is required"})
+		return
+	}
+
 	if err := pc.DB.Create(&product).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
 		return

@@ -95,3 +95,4 @@ const Inventory: React.FC = () => {
 };
 
 export default Inventory;
+

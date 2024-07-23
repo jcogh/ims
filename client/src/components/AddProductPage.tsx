@@ -6,26 +6,31 @@ import {
 import { addProduct } from '../services/api';
 
 interface ProductData {
-  name: string;
-  description: string;
-  quantity: number;
-  price: number;
+  SKU: string;
+  Name: string;
+  Description: string;
+  Quantity: number;
+  Price: number;
 }
 
 const AddProductPage: React.FC = () => {
   const navigate = useNavigate();
   const [productData, setProductData] = useState<ProductData>({
-    name: '',
-    description: '',
-    quantity: 0,
-    price: 0,
+    SKU: '',
+    Name: '',
+    Description: '',
+    Quantity: 0,
+    Price: 0,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setProductData(prev => ({ ...prev, [name]: value }));
+    setProductData(prev => ({ 
+      ...prev, 
+      [name]: name === 'Quantity' || name === 'Price' ? Number(value) : value 
+    }));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -36,8 +41,8 @@ const AddProductPage: React.FC = () => {
     try {
       await addProduct(productData);
       navigate('/inventory');
-    } catch (err) {
-      setError('Failed to add product. Please try again.');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to add product. Please try again.');
       console.error('Error adding product:', err);
     } finally {
       setLoading(false);
@@ -57,9 +62,18 @@ const AddProductPage: React.FC = () => {
       <TextField
         fullWidth
         margin="normal"
+        label="SKU"
+        name="SKU"
+        value={productData.SKU}
+        onChange={handleInputChange}
+        required
+      />
+      <TextField
+        fullWidth
+        margin="normal"
         label="Name"
-        name="name"
-        value={productData.name}
+        name="Name"
+        value={productData.Name}
         onChange={handleInputChange}
         required
       />
@@ -67,8 +81,8 @@ const AddProductPage: React.FC = () => {
         fullWidth
         margin="normal"
         label="Description"
-        name="description"
-        value={productData.description}
+        name="Description"
+        value={productData.Description}
         onChange={handleInputChange}
         multiline
         rows={4}
@@ -77,9 +91,9 @@ const AddProductPage: React.FC = () => {
         fullWidth
         margin="normal"
         label="Quantity"
-        name="quantity"
+        name="Quantity"
         type="number"
-        value={productData.quantity}
+        value={productData.Quantity}
         onChange={handleInputChange}
         required
       />
@@ -87,9 +101,9 @@ const AddProductPage: React.FC = () => {
         fullWidth
         margin="normal"
         label="Price"
-        name="price"
+        name="Price"
         type="number"
-        value={productData.price}
+        value={productData.Price}
         onChange={handleInputChange}
         required
       />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider } from './contexts/AuthContext';
@@ -9,6 +9,7 @@ import Login from './components/Login';
 import SignUp from './components/SignUp';
 import Dashboard from './components/Dashboard';
 import Inventory from './components/Inventory';
+import AddProductPage from './components/AddProductPage';
 import theme from './theme';
 
 const App: React.FC = () => {
@@ -37,7 +38,15 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route 
+              path="/add-product" 
+              element={
+                <ProtectedRoute>
+                  <AddProductPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           </Routes>
         </Router>
       </AuthProvider>
