@@ -1,30 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import api from '../services/api';
+import { 
+  Container, Typography, Box, Paper, Table, TableBody, 
+  TableCell, TableContainer, TableHead, TableRow, CircularProgress, 
+  Button, Alert
+} from '@mui/material';
+import { getProducts } from '../services/api';
 
 interface Product {
-  id: number;
-  name: string;
-  description: string;
-  quantity: number;
-  price: number;
+  ID: number;
+  Name: string;
+  Description: string;
+  Quantity: number;
+  Price: number;
 }
 
 const Inventory: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await api.get('/products');
-        setProducts(response.data);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-      }
-    };
-
     fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getProducts();
+      setProducts(response.data);
+    } catch (err) {
+      console.error('Failed to fetch products:', err);
+      setError('Failed to load products. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, textAlign: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg">
@@ -32,30 +59,36 @@ const Inventory: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Inventory
         </Typography>
-        <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell align="right">Quantity</TableCell>
-                  <TableCell align="right">Price</TableCell>
+        <Button variant="contained" color="primary" sx={{ mb: 2 }}>
+          Add New Product
+        </Button>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell align="right">Quantity</TableCell>
+                <TableCell align="right">Price</TableCell>
+                <TableCell align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.ID}>
+                  <TableCell>{product.Name}</TableCell>
+                  <TableCell>{product.Description}</TableCell>
+                  <TableCell align="right">{product.Quantity}</TableCell>
+                  <TableCell align="right">${product.Price.toFixed(2)}</TableCell>
+                  <TableCell align="center">
+                    <Button size="small" color="primary">Edit</Button>
+                    <Button size="small" color="secondary">Delete</Button>
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>{product.name}</TableCell>
-                    <TableCell>{product.description}</TableCell>
-                    <TableCell align="right">{product.quantity}</TableCell>
-                    <TableCell align="right">${product.price.toFixed(2)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
     </Container>
   );
