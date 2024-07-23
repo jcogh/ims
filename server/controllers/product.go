@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"ims-backend/models"
+	"github.com/jmcgh/ims/server/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
