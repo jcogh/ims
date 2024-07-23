@@ -1,18 +1,10 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar: React.FC = () => {
-  const navigate = useNavigate();
-
-  // This is a placeholder. Replace with actual auth logic.
-  const isAuthenticated = !!localStorage.getItem('token');
-
-  const handleLogout = () => {
-    // This is a placeholder. Replace with actual logout logic.
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <AppBar position="static">
@@ -22,13 +14,13 @@ const Navbar: React.FC = () => {
         </Typography>
         {isAuthenticated ? (
           <Box>
+            <Button color="inherit" component={RouterLink} to="/dashboard">
+              Dashboard
+            </Button>
             <Button color="inherit" component={RouterLink} to="/inventory">
               Inventory
             </Button>
-            <Button color="inherit" component={RouterLink} to="/add-product">
-              Add Product
-            </Button>
-            <Button color="inherit" onClick={handleLogout}>
+            <Button color="inherit" onClick={logout}>
               Logout
             </Button>
           </Box>
