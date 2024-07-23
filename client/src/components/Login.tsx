@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container } from '@mui/material';
-import { login } from '../services/api';
+import { login as apiLogin } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -9,29 +9,19 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login: authLogin } = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     try {
-      console.log('Attempting login...');
-      const data = await login(username, password);
-      console.log('Login response:', data);
-      
-      if (data.token) {
-        console.log('Login successful, setting auth state...');
-        authLogin(data.token, data.user);
-        console.log('Navigating to dashboard...');
-        navigate('/dashboard');
-      } else {
-        console.log('Login failed: No token received');
-        setError('Login failed: No token received');
-      }
+      const data = await apiLogin(username, password);
+      login(data.token, data.user);
+      navigate('/dashboard');
     } catch (err: any) {
-      console.error('Login error:', err);
       setError(err.error || 'Failed to login');
+      console.error('Login error:', err);
     }
   };
 
