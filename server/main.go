@@ -22,7 +22,7 @@ func main() {
 	}
 
 	// Auto-migrate the database schema
-	db.AutoMigrate(&models.Product{}, &models.User{})
+	db.AutoMigrate(&models.Product{}, &models.User{}, &models.Sales{})
 
 	// Set up the router
 	r := routes.SetupRouter(db)
@@ -32,3 +32,4 @@ func main() {
 		log.Fatal("Failed to start the server:", err)
 	}
 }
+

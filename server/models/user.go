@@ -7,3 +7,4 @@ type User struct {
 	PasswordHash string `gorm:"not null"`
 	Role         string `gorm:"not null"`
 }
+
