@@ -1,11 +1,11 @@
-module github.com/jcogh/ims
+module github.com/jcogh/ims/server
 
 go 1.22.4
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/montanaflynn/stats v0.7.1
 	golang.org/x/crypto v0.25.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.11

@@ -46,7 +46,7 @@ func (pc *PredictionController) PredictOrderQuantity(c *gin.Context) {
 		return
 	}
 
-	recommendedOrderQuantity := utils.CalculateOrderQuantity(predictedQuantity, product.Quantity)
+	recommendedOrderQuantity := utils.CalculateOrderQuantity(predictedQuantity, float64(product.Quantity))
 
 	c.JSON(http.StatusOK, gin.H{
 		"product_id":                 productID,
