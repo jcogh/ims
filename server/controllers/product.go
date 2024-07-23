@@ -16,11 +16,27 @@ func NewProductController(db *gorm.DB) *ProductController {
 	return &ProductController{DB: db}
 }
 
-// Create product (INSERT)
+// GetProduct retrieves a single product by ID
+func (pc *ProductController) GetProduct(c *gin.Context) {
+	id := c.Param("id")
+	var product models.Product
+	if err := pc.DB.First(&product, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch product: " + err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, product)
+}
+
+// CreateProduct creates a new product
 func (pc *ProductController) CreateProduct(c *gin.Context) {
 	var product models.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
 		return
 	}
 
@@ -30,59 +46,68 @@ func (pc *ProductController) CreateProduct(c *gin.Context) {
 	}
 
 	if err := pc.DB.Create(&product).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product: " + err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, product)
 }
 
-// Read product(s) (SELECT)
+// GetProducts retrieves all products
 func (pc *ProductController) GetProducts(c *gin.Context) {
 	var products []models.Product
 	if err := pc.DB.Find(&products).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch products"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch products: " + err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, products)
 }
 
-// Update product (UPDATE)
+// UpdateProduct updates an existing product
 func (pc *ProductController) UpdateProduct(c *gin.Context) {
 	id := c.Param("id")
 	var product models.Product
 	if err := pc.DB.First(&product, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch product: " + err.Error()})
+		}
 		return
 	}
 
 	if err := c.ShouldBindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
 		return
 	}
 
 	if err := pc.DB.Save(&product).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product: " + err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, product)
 }
 
-// Delete product (DELETE)
+// DeleteProduct deletes a product
 func (pc *ProductController) DeleteProduct(c *gin.Context) {
 	id := c.Param("id")
 	var product models.Product
 	if err := pc.DB.First(&product, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch product: " + err.Error()})
+		}
 		return
 	}
 
 	if err := pc.DB.Delete(&product).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete product: " + err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
 }
+

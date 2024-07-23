@@ -33,17 +33,20 @@ export const getProducts = async () => {
   return api.get('/products');
 };
 
+export const getProduct = async (id: number) => {
+  return api.get(`/products/${id}`);
+};
+
 export const addProduct = async (productData: any) => {
   return api.post('/products', productData);
 };
 
-export const updateProduct = (id: string, productData: any) => {
+export const updateProduct = async (id: number, productData: any) => {
   return api.put(`/products/${id}`, productData);
 };
 
-export const deleteProduct = (id: string) => {
+export const deleteProduct = async (id: number) => {
   return api.delete(`/products/${id}`);
 };
 
 export default api;
-

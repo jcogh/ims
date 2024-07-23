@@ -2,6 +2,7 @@ import React from 'react';
 import { Container, Typography, Box, Button, Paper, Grid } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
@@ -37,10 +38,10 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} sm={6}>
               <Paper elevation={2} sx={{ p: 2 }}>
                 <Typography variant="subtitle1">Quick Actions</Typography>
-                <Button variant="contained" color="primary" sx={{ mt: 1 }}>
+                <Button component={RouterLink} to="/inventory" variant="contained" color="primary" sx={{ mt: 1 }}>
                   View Inventory
                 </Button>
-                <Button variant="contained" color="secondary" sx={{ mt: 1, ml: 1 }}>
+                <Button component={RouterLink} to="/add-product" variant="contained" color="secondary" sx={{ mt: 1, ml: 1 }}>
                   Add Product
                 </Button>
               </Paper>

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   Container, Typography, Box, Paper, Table, TableBody, 
   TableCell, TableContainer, TableHead, TableRow, CircularProgress, 
-  Button, Alert
+  Button, Alert, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
 } from '@mui/material';
-import { getProducts } from '../services/api';
+import { Link } from 'react-router-dom';
+import { getProducts, deleteProduct } from '../services/api';
 
 interface Product {
   ID: number;
+  SKU: string;
   Name: string;
   Description: string;
   Quantity: number;
@@ -18,6 +20,8 @@ const Inventory: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -34,6 +38,24 @@ const Inventory: React.FC = () => {
       setError('Failed to load products. Please try again later.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (product: Product) => {
+    setProductToDelete(product);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (productToDelete) {
+      try {
+        await deleteProduct(productToDelete.ID);
+        setProducts(products.filter(p => p.ID !== productToDelete.ID));
+        setDeleteDialogOpen(false);
+      } catch (err) {
+        console.error('Failed to delete product:', err);
+        setError('Failed to delete product. Please try again later.');
+      }
     }
   };
 
@@ -59,13 +81,20 @@ const Inventory: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Inventory
         </Typography>
-        <Button variant="contained" color="primary" sx={{ mb: 2 }}>
+        <Button 
+          component={Link} 
+          to="/add-product" 
+          variant="contained" 
+          color="primary" 
+          sx={{ mb: 2 }}
+        >
           Add New Product
         </Button>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>SKU</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell align="right">Quantity</TableCell>
@@ -76,23 +105,58 @@ const Inventory: React.FC = () => {
             <TableBody>
               {products.map((product) => (
                 <TableRow key={product.ID}>
+                  <TableCell>{product.SKU}</TableCell>
                   <TableCell>{product.Name}</TableCell>
                   <TableCell>{product.Description}</TableCell>
                   <TableCell align="right">{product.Quantity}</TableCell>
                   <TableCell align="right">${product.Price.toFixed(2)}</TableCell>
                   <TableCell align="center">
-                    <Button size="small" color="primary">Edit</Button>
-                    <Button size="small" color="secondary">Delete</Button>
+                    <Button 
+                      component={Link} 
+                      to={`/edit-product/${product.ID}`} 
+                      size="small" 
+                      color="primary"
+                    >
+                      Edit
+                    </Button>
+                    <Button 
+                      size="small" 
+                      color="secondary" 
+                      onClick={() => handleDeleteClick(product)}
+                    >
+                      Delete
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+        {products.length === 0 && (
+          <Typography sx={{ mt: 2, textAlign: 'center' }}>
+            No products found. Add a new product to get started.
+          </Typography>
+        )}
       </Box>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete the product "{productToDelete?.Name}"?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="secondary">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
 
 export default Inventory;
-
