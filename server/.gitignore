@@ -1,2 +1,32 @@
 # env
 .env
+
+# Binaries
+*.exe
+*.out
+
+# Object files
+*.o
+
+# Go build files
+*_test.go
+*.test
+_build
+
+# Go module files
+go.mod
+go.sum
+
+# IDE files
+.vscode/
+.idea/
+
+# Log files
+*.log
+
+# Temporary files
+*~
+*.tmp
+
+# Vendor directory
+vendor/

@@ -29,9 +29,7 @@ func calculateMovingAverage(data []float64, window int) []float64 {
 }
 
 func CalculateOrderQuantity(predictedDemand, currentInventory float64) float64 {
-	// Calculate the recommended order quantity based on predicted demand and current inventory
-	// Here, we use a simple reorder point strategy
-	reorderPoint := 100.0 // Reorder when inventory falls below this level
+	reorderPoint := 100.0
 	recommendedOrderQuantity := predictedDemand - currentInventory
 	if recommendedOrderQuantity < 0 {
 		recommendedOrderQuantity = 0
