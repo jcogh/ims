@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
-  Grid, 
-  Button, 
-  CircularProgress, 
-  Alert
+  Box, Typography, Card, CardContent, Grid, Button, CircularProgress, Alert, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
 } from '@mui/material';
-import { getProduct } from '../services/api';
+import { getProduct, deleteProduct } from '../services/api';
 import PredictionCard from './PredictionCard';
 
 interface Product {
@@ -28,6 +21,7 @@ const ProductDetailPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,6 +38,16 @@ const ProductDetailPage: React.FC = () => {
 
     fetchProduct();
   }, [id]);
+
+  const handleDelete = async () => {
+    try {
+      await deleteProduct(Number(id));
+      navigate('/inventory');
+    } catch (err) {
+      console.error('Failed to delete product:', err);
+      setError('Failed to delete product. Please try again.');
+    }
+  };
 
   if (loading) {
     return (
@@ -110,13 +114,29 @@ const ProductDetailPage: React.FC = () => {
         <Button 
           variant="outlined" 
           color="secondary" 
-          onClick={() => {
-            console.log('Delete product');
-          }}
+          onClick={() => setDeleteDialogOpen(true)}
         >
           Delete Product
         </Button>
       </Box>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this product? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleDelete} color="secondary">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

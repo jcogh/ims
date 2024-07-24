@@ -21,7 +21,7 @@ func main() {
 	}
 
 	if err := migrations.AddTimestampsToProducts(db); err != nil {
-		log.Fatal("Failed to run migration:", err)
+		log.Printf("Migration warning: %v", err)
 	}
 
 	db.AutoMigrate(&models.Product{}, &models.User{}, &models.Sales{})
@@ -32,3 +32,4 @@ func main() {
 		log.Fatal("Failed to start the server:", err)
 	}
 }
+

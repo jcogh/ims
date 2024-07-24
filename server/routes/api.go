@@ -25,8 +25,11 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	productController := controllers.NewProductController(db)
 	authController := controllers.NewAuthController(db)
 	predictionController := controllers.NewPredictionController(db)
+	inventoryController := controllers.NewInventoryController(db)
 
 	api := r.Group("/api")
+
+	api.GET("/inventory/summary", inventoryController.GetInventorySummary)
 	{
 		// Product routes
 		api.POST("/products", productController.CreateProduct)
@@ -46,4 +49,3 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	return r
 }
-

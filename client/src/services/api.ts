@@ -43,6 +43,8 @@ export const deleteProduct = (id: number) => api.delete(`/products/${id}`);
 
 export const getRecentProducts = () => api.get('/products/recent');
 
+export const getInventorySummary = () => api.get('/inventory/summary');
+
 export const getPrediction = (productId: number) => api.get(`/predict/${productId}`);
 
 export default api;

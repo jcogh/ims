@@ -1,21 +1,58 @@
-import React from 'react';
-import { Container, Typography, Box, Button, Paper, Grid } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Link as RouterLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { 
+  Container, Typography, Box, Paper, Grid, CircularProgress, 
+  List, ListItem, ListItemText, Button, Card, CardContent
+} from '@mui/material';
+import { Link } from 'react-router-dom';
+import { getRecentProducts, getInventorySummary } from '../services/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+interface Product {
+  ID: number;
+  Name: string;
+  SKU: string;
+  CreatedAt: string;
+  Quantity: number;
+  Price: number;
+}
+
+interface InventorySummary {
+  totalProducts: number;
+  lowStockItems: number;
+  totalValue: number;
+}
 
 const Dashboard: React.FC = () => {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [inventorySummary, setInventorySummary] = useState<InventorySummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [productsResponse, summaryResponse] = await Promise.all([
+          getRecentProducts(),
+          getInventorySummary()
+        ]);
+        setRecentProducts(productsResponse.data);
+        setInventorySummary(summaryResponse.data);
+      } catch (err) {
+        console.error('Failed to fetch dashboard data:', err);
+        setError('Failed to load dashboard data.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Retrieve user data from localStorage
-  const userString = localStorage.getItem('user');
-  const user = userString ? JSON.parse(userString) : null;
+    fetchData();
+  }, []);
+
+  const chartData = recentProducts.map(product => ({
+    name: product.Name,
+    quantity: product.Quantity
+  }));
 
   return (
     <Container maxWidth="lg">
@@ -23,40 +60,90 @@ const Dashboard: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           Dashboard
         </Typography>
-        <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Typography variant="h6">Welcome, {user?.username || 'User'}!</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Paper elevation={2} sx={{ p: 2 }}>
-                <Typography variant="subtitle1">User Information</Typography>
-                <Typography>Username: {user?.username}</Typography>
-                <Typography>Role: {user?.role}</Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Paper elevation={2} sx={{ p: 2 }}>
-                <Typography variant="subtitle1">Quick Actions</Typography>
-                <Button component={RouterLink} to="/inventory" variant="contained" color="primary" sx={{ mt: 1 }}>
-                  View Inventory
-                </Button>
-                <Button component={RouterLink} to="/add-product" variant="contained" color="secondary" sx={{ mt: 1, ml: 1 }}>
-                  Add Product
-                </Button>
-              </Paper>
-            </Grid>
+        <Grid container spacing={3}>
+          {/* Inventory Summary */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Inventory Summary</Typography>
+                {loading ? (
+                  <CircularProgress />
+                ) : inventorySummary ? (
+                  <>
+                    <Typography>Total Products: {inventorySummary.totalProducts}</Typography>
+                    <Typography>Low Stock Items: {inventorySummary.lowStockItems}</Typography>
+                    <Typography>Total Value: ${inventorySummary.totalValue.toFixed(2)}</Typography>
+                  </>
+                ) : (
+                  <Typography color="error">Failed to load summary</Typography>
+                )}
+              </CardContent>
+            </Card>
           </Grid>
-        </Paper>
-        <Box sx={{ mt: 3 }}>
-          <Button variant="outlined" color="secondary" onClick={handleLogout}>
-            Logout
-          </Button>
-        </Box>
+
+          {/* Product Quantity Chart */}
+          <Grid item xs={12} md={8}>
+            <Paper sx={{ p: 2, height: 300 }}>
+              <Typography variant="h6" gutterBottom>Product Quantities</Typography>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="quantity" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Paper>
+          </Grid>
+
+          {/* Recently Added Products */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Recently Added Products
+              </Typography>
+              {loading ? (
+                <CircularProgress />
+              ) : error ? (
+                <Typography color="error">{error}</Typography>
+              ) : recentProducts.length > 0 ? (
+                <List>
+                  {recentProducts.map((product) => (
+                    <ListItem key={product.ID}>
+                      <ListItemText
+                        primary={product.Name}
+                        secondary={`SKU: ${product.SKU} | Added: ${new Date(product.CreatedAt).toLocaleDateString()}`}
+                      />
+                      <Button 
+                        component={Link} 
+                        to={`/product/${product.ID}`}
+                        size="small"
+                        variant="outlined"
+                      >
+                        View
+                      </Button>
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Typography>No recent products found.</Typography>
+              )}
+              <Button 
+                component={Link} 
+                to="/inventory" 
+                variant="contained" 
+                color="primary" 
+                sx={{ mt: 2 }}
+              >
+                View All Products
+              </Button>
+            </Paper>
+          </Grid>
+        </Grid>
       </Box>
     </Container>
   );
 };
 
 export default Dashboard;
-
