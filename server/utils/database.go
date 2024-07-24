@@ -16,7 +16,6 @@ func ConnectDB() (*gorm.DB, error) {
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_NAME"),
-		os.Getenv("SSL_MODE"),
 	)
 	return gorm.Open(mysql.Open(dsn), &gorm.Config{})
 }
