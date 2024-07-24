@@ -6,14 +6,12 @@ import (
 	"github.com/jcogh/ims/server/routes"
 	"github.com/jcogh/ims/server/utils"
 	"log"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// if err := godotenv.Load(); err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
 
 	db, err := utils.ConnectDB()
 	if err != nil {
@@ -32,4 +30,3 @@ func main() {
 		log.Fatal("Failed to start the server:", err)
 	}
 }
-
