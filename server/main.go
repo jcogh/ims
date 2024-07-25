@@ -24,43 +24,35 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	log.Printf("Database Config: Host=%s, Port=%s, User=%s, DBName=%s",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_NAME"),
-	)
-
+	// Connect to the database
 	db, err := utils.ConnectDB()
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)
 	}
 
-	// Verify the connection
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Fatal("Failed to get database instance:", err)
-	}
-	err = sqlDB.Ping()
-	if err != nil {
-		log.Fatal("Failed to ping database:", err)
-	}
-
-	log.Println("Successfully connected to the database")
-
+	// Auto-migrate database schema
 	log.Println("Starting database auto-migration...")
-	if err := db.AutoMigrate(&models.User{}, &models.Product{}, &models.Sales{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		log.Fatal("Failed to auto-migrate database schema:", err)
+	}
+	if err := db.AutoMigrate(&models.Product{}); err != nil {
+		log.Fatal("Failed to auto-migrate database schema:", err)
+	}
+	if err := db.AutoMigrate(&models.Sales{}); err != nil {
 		log.Fatal("Failed to auto-migrate database schema:", err)
 	}
 	log.Println("Database auto-migration completed successfully")
 
+	// Setup router
 	r := routes.SetupRouter(db)
 
+	// Determine port
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // default port for local development
 	}
 
+	// Start server
 	log.Printf("Server starting on port %s", port)
 	if err := r.Run(":" + port); err != nil {
 		log.Fatal("Failed to start the server:", err)

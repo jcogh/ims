@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios';
 
 const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://ims-app-vtrea.ondigitalocean.app/api'
-  : 'http://localhost:8080/api';
+  : 'http://localhost:8080';
 
 console.log('API_BASE_URL:', API_BASE_URL); // For debugging
 

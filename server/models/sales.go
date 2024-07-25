@@ -5,12 +5,12 @@ import (
 )
 
 type Sales struct {
-	ID        uint `gorm:"primaryKey"`
-	ProductID uint
-	Product   Product
+	ID        uint    `gorm:"primaryKey"`
+	ProductID uint    `gorm:"index"`
+	Product   Product `gorm:"foreignKey:ProductID;references:ID"`
 	Quantity  uint
 	Total     float64
-	SoldAt    time.Time `gorm:"index"`
+	SoldAt    time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
