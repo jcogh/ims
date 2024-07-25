@@ -58,6 +58,7 @@ func (ac *AuthController) Register(c *gin.Context) {
 	}
 
 	if err := ac.DB.Create(&user).Error; err != nil {
+		log.Printf("Failed to create user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}

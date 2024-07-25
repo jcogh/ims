@@ -27,7 +27,11 @@ func main() {
 		log.Printf("Migration warning: %v", err)
 	}
 
-	db.AutoMigrate(&models.Product{}, &models.User{}, &models.Sales{})
+	log.Println("Starting database auto-migration...")
+	if err := db.AutoMigrate(&models.Product{}, &models.User{}, &models.Sales{}); err != nil {
+		log.Fatal("Failed to auto-migrate database schema:", err)
+	}
+	log.Println("Database auto-migration completed successfully")
 
 	r := routes.SetupRouter(db)
 
@@ -41,4 +45,3 @@ func main() {
 		log.Fatal("Failed to start the server:", err)
 	}
 }
-
