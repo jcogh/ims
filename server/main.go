@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/jcogh/ims/server/migrations"
+	"github.com/gin-gonic/gin"
 	"github.com/jcogh/ims/server/models"
 	"github.com/jcogh/ims/server/routes"
 	"github.com/jcogh/ims/server/utils"
@@ -12,23 +12,44 @@ import (
 )
 
 func main() {
+	// Load .env file only in development
 	if os.Getenv("GIN_MODE") != "release" {
 		if err := godotenv.Load(); err != nil {
 			log.Println("Warning: .env file not found. Using environment variables.")
 		}
 	}
 
+	// Set Gin mode
+	if os.Getenv("GIN_MODE") != "debug" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	log.Printf("Database Config: Host=%s, Port=%s, User=%s, DBName=%s",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_NAME"),
+	)
+
 	db, err := utils.ConnectDB()
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)
 	}
 
-	if err := migrations.AddTimestampsToProducts(db); err != nil {
-		log.Printf("Migration warning: %v", err)
+	// Verify the connection
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal("Failed to get database instance:", err)
+	}
+	err = sqlDB.Ping()
+	if err != nil {
+		log.Fatal("Failed to ping database:", err)
 	}
 
+	log.Println("Successfully connected to the database")
+
 	log.Println("Starting database auto-migration...")
-	if err := db.AutoMigrate(&models.Product{}, &models.User{}, &models.Sales{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.Product{}, &models.Sales{}); err != nil {
 		log.Fatal("Failed to auto-migrate database schema:", err)
 	}
 	log.Println("Database auto-migration completed successfully")
@@ -45,3 +66,4 @@ func main() {
 		log.Fatal("Failed to start the server:", err)
 	}
 }
+

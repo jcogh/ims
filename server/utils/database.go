@@ -19,3 +19,4 @@ func ConnectDB() (*gorm.DB, error) {
 	)
 	return gorm.Open(mysql.Open(dsn), &gorm.Config{})
 }
+
