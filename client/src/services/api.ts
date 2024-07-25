@@ -1,6 +1,8 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api';
+
+console.log('API_BASE_URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,7 +11,6 @@ const api = axios.create({
   },
 });
 
-// Add a request interceptor to include the token in requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -21,14 +22,32 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+api.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => {
+    console.error('API Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
 export const login = async (username: string, password: string) => {
-  const response = await api.post('/login', { username, password });
-  return response.data;
+  try {
+    const response = await api.post('/login', { username, password });
+    return response.data;
+  } catch (error) {
+    console.error('Login error:', (error as AxiosError).response?.data || (error as Error).message);
+    throw error;
+  }
 };
 
 export const register = async (username: string, email: string, password: string) => {
-  const response = await api.post('/register', { username, email, password });
-  return response.data;
+  try {
+    const response = await api.post('/register', { username, email, password });
+    return response.data;
+  } catch (error) {
+    console.error('Registration error:', (error as AxiosError).response?.data || (error as Error).message);
+    throw error;
+  }
 };
 
 export const getProducts = () => api.get('/products');
