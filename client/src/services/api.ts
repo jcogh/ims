@@ -69,3 +69,4 @@ export const getInventorySummary = () => api.get('/inventory/summary');
 export const getPrediction = (productId: number) => api.get(`/predict/${productId}`);
 
 export default api;
+

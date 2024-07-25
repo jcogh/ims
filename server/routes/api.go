@@ -13,7 +13,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	// Add CORS middleware
 	config := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "https://ims-app-vtrea.ondigitalocean.app"},
+		AllowOrigins:     []string{"https://ims-app-vtrea.ondigitalocean.app", "http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -27,26 +27,23 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	predictionController := controllers.NewPredictionController(db)
 	inventoryController := controllers.NewInventoryController(db)
 
-	api := r.Group("/api")
-	{
-		// Auth routes
-		api.POST("/register", authController.Register)
-		api.POST("/login", authController.Login)
+	// Auth routes
+	r.POST("/register", authController.Register)
+	r.POST("/login", authController.Login)
 
-		// Inventory summary route
-		api.GET("/inventory/summary", inventoryController.GetInventorySummary)
+	// Inventory summary route
+	r.GET("/inventory/summary", inventoryController.GetInventorySummary)
 
-		// Product routes
-		api.POST("/products", productController.CreateProduct)
-		api.GET("/products", productController.GetProducts)
-		api.GET("/products/:id", productController.GetProduct)
-		api.PUT("/products/:id", productController.UpdateProduct)
-		api.DELETE("/products/:id", productController.DeleteProduct)
-		api.GET("/products/recent", productController.GetRecentProducts)
+	// Product routes
+	r.POST("/products", productController.CreateProduct)
+	r.GET("/products", productController.GetProducts)
+	r.GET("/products/:id", productController.GetProduct)
+	r.PUT("/products/:id", productController.UpdateProduct)
+	r.DELETE("/products/:id", productController.DeleteProduct)
+	r.GET("/products/recent", productController.GetRecentProducts)
 
-		// Prediction route
-		api.GET("/predict/:id", predictionController.PredictOrderQuantity)
-	}
+	// Prediction route
+	r.GET("/predict/:id", predictionController.PredictOrderQuantity)
 
 	return r
 }
