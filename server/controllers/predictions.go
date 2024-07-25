@@ -3,8 +3,11 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jcogh/ims/server/models"
+	"github.com/jcogh/ims/server/utils"
 	"gorm.io/gorm"
+	"log"
 	"net/http"
+	"time"
 )
 
 type PredictionController struct {
@@ -18,30 +21,43 @@ func NewPredictionController(db *gorm.DB) *PredictionController {
 func (pc *PredictionController) PredictOrderQuantity(c *gin.Context) {
 	productID := c.Param("id")
 
-	// Fetch historical sales data
 	var sales []models.Sales
-	if err := pc.DB.Where("product_id = ?", productID).Order("date").Find(&sales).Error; err != nil {
+	if err := pc.DB.Where("product_id = ?", productID).Order("sold_at").Find(&sales).Error; err != nil {
+		log.Printf("Error fetching sales data: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch sales data"})
 		return
 	}
 
-	// Perform simple moving average prediction
-	prediction := calculateMovingAverage(sales)
-
-	// Get current inventory
-	var product models.Product
-	if err := pc.DB.First(&product, productID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+	if len(sales) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No sales data available for prediction", "recommendedOrder": 0})
 		return
 	}
 
-	// Calculate recommended order quantity
-	recommendedQuantity := calculateRecommendedQuantity(prediction, int(product.Quantity))
+	// Extract dates and quantities
+	var dates []time.Time
+	var quantities []float64
+	for _, sale := range sales {
+		dates = append(dates, sale.SoldAt)
+		quantities = append(quantities, float64(sale.Quantity))
+	}
+
+	// Use your prediction logic here
+	predictedDemand := utils.ForecastDemand(dates, quantities)
+
+	// Fetch current inventory
+	var product models.Product
+	if err := pc.DB.First(&product, productID).Error; err != nil {
+		log.Printf("Error fetching product data: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch product data"})
+		return
+	}
+
+	recommendedOrder := utils.CalculateOrderQuantity(predictedDemand, float64(product.Quantity))
 
 	c.JSON(http.StatusOK, gin.H{
-		"predicted_demand":      prediction,
-		"current_inventory":     product.Quantity,
-		"recommended_order_qty": recommendedQuantity,
+		"predictedDemand":  predictedDemand,
+		"currentInventory": product.Quantity,
+		"recommendedOrder": recommendedOrder,
 	})
 }
 
@@ -67,4 +83,3 @@ func calculateRecommendedQuantity(predictedDemand, currentInventory int) int {
 	}
 	return 0
 }
-

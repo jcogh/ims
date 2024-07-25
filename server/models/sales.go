@@ -10,8 +10,7 @@ type Sales struct {
 	Product   Product
 	Quantity  uint
 	Total     float64
-	SoldAt    time.Time
+	SoldAt    time.Time `gorm:"index"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
-
