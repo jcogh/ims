@@ -18,11 +18,6 @@ func ConnectDB() (*gorm.DB, error) {
 		log.Println("No .env file found, using environment variables")
 	}
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	log.Println("DB_USER:", os.Getenv("DB_USER"))
 	log.Println("DB_PASSWORD:", os.Getenv("DB_PASSWORD"))
 	log.Println("DB_HOST:", os.Getenv("DB_HOST"))
