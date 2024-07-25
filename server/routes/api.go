@@ -13,7 +13,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	// Add CORS middleware
 	config := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"http://localhost:3000", "https://ims-app-vtrea.ondigitalocean.app"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -28,9 +28,14 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	inventoryController := controllers.NewInventoryController(db)
 
 	api := r.Group("/api")
-
-	api.GET("/inventory/summary", inventoryController.GetInventorySummary)
 	{
+		// Auth routes
+		api.POST("/register", authController.Register)
+		api.POST("/login", authController.Login)
+
+		// Inventory summary route
+		api.GET("/inventory/summary", inventoryController.GetInventorySummary)
+
 		// Product routes
 		api.POST("/products", productController.CreateProduct)
 		api.GET("/products", productController.GetProducts)
@@ -41,11 +46,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		// Prediction route
 		api.GET("/predict/:id", predictionController.PredictOrderQuantity)
-
-		// Auth routes
-		api.POST("/register", authController.Register)
-		api.POST("/login", authController.Login)
 	}
 
 	return r
 }
+
