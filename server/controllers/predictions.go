@@ -21,30 +21,6 @@ func NewPredictionController(db *gorm.DB) *PredictionController {
 func (pc *PredictionController) PredictOrderQuantity(c *gin.Context) {
 	productID := c.Param("id")
 
-	var sales []models.Sales
-	if err := pc.DB.Where("product_id = ?", productID).Order("sold_at").Find(&sales).Error; err != nil {
-		log.Printf("Error fetching sales data: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch sales data"})
-		return
-	}
-
-	if len(sales) == 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "No sales data available for prediction", "recommendedOrder": 0})
-		return
-	}
-
-	// Extract dates and quantities
-	var dates []time.Time
-	var quantities []float64
-	for _, sale := range sales {
-		dates = append(dates, sale.SoldAt)
-		quantities = append(quantities, float64(sale.Quantity))
-	}
-
-	// Use your prediction logic here
-	predictedDemand := utils.ForecastDemand(dates, quantities)
-
-	// Fetch current inventory
 	var product models.Product
 	if err := pc.DB.First(&product, productID).Error; err != nil {
 		log.Printf("Error fetching product data: %v", err)
@@ -52,34 +28,30 @@ func (pc *PredictionController) PredictOrderQuantity(c *gin.Context) {
 		return
 	}
 
+	var sales []models.Sales
+	if err := pc.DB.Where("product_id = ?", productID).Order("sold_at").Find(&sales).Error; err != nil {
+		log.Printf("Error fetching sales data: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch sales data"})
+		return
+	}
+
+	var dates []time.Time
+	var quantities []float64
+	for _, sale := range sales {
+		dates = append(dates, sale.SoldAt)
+		quantities = append(quantities, float64(sale.Quantity))
+	}
+
+	predictedDemand := utils.ForecastDemand(dates, quantities)
 	recommendedOrder := utils.CalculateOrderQuantity(predictedDemand, float64(product.Quantity))
 
-	c.JSON(http.StatusOK, gin.H{
-		"predictedDemand":  predictedDemand,
-		"currentInventory": product.Quantity,
-		"recommendedOrder": recommendedOrder,
-	})
-}
-
-func calculateMovingAverage(sales []models.Sales) int {
-	if len(sales) == 0 {
-		return 0
+	response := gin.H{
+		"predicted_demand":      predictedDemand,
+		"current_inventory":     product.Quantity,
+		"recommended_order_qty": recommendedOrder,
 	}
 
-	totalSales := 0
-	for _, sale := range sales {
-		totalSales += int(sale.Quantity)
-	}
-
-	return totalSales / len(sales)
+	log.Printf("Prediction for product %s: %+v", productID, response)
+	c.JSON(http.StatusOK, response)
 }
 
-func calculateRecommendedQuantity(predictedDemand, currentInventory int) int {
-	safetyStock := 10 // You might want to make this configurable
-	reorderPoint := predictedDemand + safetyStock
-
-	if currentInventory < reorderPoint {
-		return reorderPoint - currentInventory
-	}
-	return 0
-}

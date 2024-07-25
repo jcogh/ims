@@ -5,27 +5,15 @@ import (
 )
 
 func ForecastDemand(dates []time.Time, quantities []float64) float64 {
-	period := 30
-	movingAverage := calculateMovingAverage(quantities, period)
-	predictedDemand := movingAverage[len(movingAverage)-1]
-	return predictedDemand
-}
-
-func calculateMovingAverage(data []float64, window int) []float64 {
-	if len(data) < window {
-		return nil
+	if len(quantities) == 0 {
+		return 0
 	}
 
-	movingAverage := make([]float64, len(data)-window+1)
-	for i := 0; i <= len(data)-window; i++ {
-		sum := 0.0
-		for j := i; j < i+window; j++ {
-			sum += data[j]
-		}
-		movingAverage[i] = sum / float64(window)
+	total := 0.0
+	for _, q := range quantities {
+		total += q
 	}
-
-	return movingAverage
+	return total / float64(len(quantities))
 }
 
 func CalculateOrderQuantity(predictedDemand, currentInventory float64) float64 {
@@ -39,3 +27,4 @@ func CalculateOrderQuantity(predictedDemand, currentInventory float64) float64 {
 	}
 	return recommendedOrderQuantity
 }
+
